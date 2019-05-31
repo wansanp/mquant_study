@@ -7,17 +7,35 @@ class Stock:
     stock_item_list_file = 'data/market_stock_item_data.csv'
 
     def main(self):
+        #self.get_dividend_rate_2017_2018()
+        self.get_roe_ev_ebitda_2018()
+
+    def get_roe_ev_ebitda_2018(self):
+        stock_item_list = self.get_all_stock_item_list()
+
+        print('종목명,ROE(자본수익률),EV/EABITDA(이익수익률)')
+
+        for stock in stock_item_list:
+            data = self.get_roe_ev_ebitda_per_code(stock[0])
+
+            if data is None:
+                print(stock[1] + ',n/a,n/a')
+            else:
+                print(stock[1] + "," + data[0] + "," + data[1])
+
+
+    def get_dividend_rate_2017_2018(self):
         stock_item_list = self.get_all_stock_item_list()
 
         print('종목명,2017,2018')
 
         for stock in stock_item_list:
-            data = self.get_dividend_rate(stock[0])
+            data = self.get_dividend_rate_per_code(stock[0])
 
             if data is None:
-                print(stock[1] + ",0,0")
+                print(stock[1] + ',0,0')
             else:
-                print(stock[1] + "," + data[0] + "," + data[1])
+                print(stock[1] + ',' + data[0] + ',' + data[1])
 
     def get_all_stock_item_list(self):
 
@@ -35,7 +53,7 @@ class Stock:
 
         return stock_item_list
 
-    def get_dividend_rate(self, code):
+    def get_dividend_rate_per_code(self, code):
 
         url = 'https://comp.fnguide.com/SVO2/ASP/SVD_main.asp?gicode=A'+code
 
@@ -90,6 +108,47 @@ class Stock:
                 dividend_rate_2018 = '0'
 
         data = (dividend_rate_2017, dividend_rate_2018)
+
+        return data
+
+    def get_roe_ev_ebitda_per_code(self, code):
+
+        # 자본 수익률 : ROE (Return On Equity) = 순이익 / 자기자본 * 100 = 높을 수록 좋다
+        # 이익 수익률 : EV/EBITDA = 기업 가치 (시가총액 + 순차입금) / 순이익 (이자비용, 감가상각비, 세금 빼기 전) = 낮을 수록 좋다
+
+        url = 'https://comp.fnguide.com/SVO2/ASP/SVD_main.asp?gicode=A'+code
+
+        tables = pd.read_html(url)
+
+        df = None
+
+        for table in tables:
+            if '구분' in table.columns:
+                df = table
+                break
+
+        if df is None:
+            return None
+
+        df = df.set_index('구분')
+
+        df = df[df.columns[0]]
+
+        df = df.loc[['ROE', 'EV/EBITDA']]
+
+        roe = str(df['ROE'])
+        if roe == 'nan' or roe == '완전잠식' or roe == 'N/A(IFRS)':
+            roe = 'n/a'
+        if roe != 'n/a' and float(roe) < 0:
+            roe = 'n/a'
+
+        ev_ebitda = str(df['EV/EBITDA'])
+        if ev_ebitda == 'nan':
+            ev_ebitda = 'n/a'
+        if ev_ebitda != 'n/a' and float(ev_ebitda) < 0:
+            ev_ebitda = 'n/a'
+
+        data = (roe, ev_ebitda)
 
         return data
 
