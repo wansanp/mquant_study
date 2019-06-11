@@ -22,7 +22,7 @@ class Stock:
             increase_rate = sise.get_increase_rate_by_code(stock[0], None)
 
             if data is None:
-                print(stock[1] + ',n/a,n/a')
+                print(stock[1] + "n/a, n/a, n/a, n/a, n/a, n/a")
             else:
                 if increase_rate is None:
                     print(stock[1] + "," + data[0] + "," + data[1] + ", n/a, n/a, n/a, n/a")
