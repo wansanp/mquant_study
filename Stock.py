@@ -1,5 +1,5 @@
 import pandas as pd
-
+from Sise import Sise
 
 class Stock:
 
@@ -15,14 +15,19 @@ class Stock:
 
         print('종목명,ROE(자본수익률),EV/EABITDA(이익수익률)')
 
+        sise = Sise()
+
         for stock in stock_item_list:
             data = self.get_roe_ev_ebitda_per_code(stock[0])
+            increase_rate = sise.get_increase_rate_by_code(stock[0], None)
 
             if data is None:
                 print(stock[1] + ',n/a,n/a')
             else:
-                print(stock[1] + "," + data[0] + "," + data[1])
-
+                if increase_rate is None:
+                    print(stock[1] + "," + data[0] + "," + data[1] + ", n/a, n/a, n/a, n/a")
+                else:
+                    print(stock[1] + "," + data[0] + "," + data[1] + "," + str(increase_rate[0]) + "," + increase_rate[1] + "," + str(increase_rate[2]) + "," + str(increase_rate[3]))
 
     def get_dividend_rate_2017_2018(self):
         stock_item_list = self.get_all_stock_item_list()
