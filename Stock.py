@@ -8,7 +8,8 @@ class Stock:
 
     def main(self):
         #self.get_dividend_rate_2017_2018()
-        self.get_roe_ev_ebitda_2018()
+        #self.get_roe_ev_ebitda_2018()
+        self.get_all_stock_category()
 
     def get_roe_ev_ebitda_2018(self):
         stock_item_list = self.get_all_stock_item_list()
@@ -50,9 +51,8 @@ class Stock:
 
         for line in file.readlines():
             token = line.split(',')
-            if len(token) > 10:
-                item = (token[1], token[2])
-                stock_item_list.append(item)
+            item = (token[1], token[2], token[3])
+            stock_item_list.append(item)
 
         stock_item_list = stock_item_list[1:]
 
@@ -60,7 +60,7 @@ class Stock:
 
     def get_dividend_rate_per_code(self, code):
 
-        url = 'https://comp.fnguide.com/SVO2/ASP/SVD_main.asp?gicode=A'+code
+        url = 'https://comp.fnguide.com/SVO2/ASP/SVD_main.asp?gicode=A' + code
 
         tables = pd.read_html(url)
 
@@ -156,6 +156,21 @@ class Stock:
         data = (roe, ev_ebitda)
 
         return data
+
+    def get_all_stock_category(self):
+
+        file = open(self.stock_item_list_file, 'rt', encoding='utf8')
+
+        category_item_list = []
+
+        for line in file.readlines():
+            token = line.split(',')
+            category_item_list.append(token[3] + "," + token[4])
+
+        category_item_list = list(set(category_item_list))
+
+        for category in category_item_list:
+            print(category)
 
 
 if __name__ == '__main__':
