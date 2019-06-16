@@ -15,17 +15,18 @@ class Invest:
         average_per_business_category_dict = self.read_average_per_file()
         stock_item_list = stock.get_all_stock_item_list()
 
-        print("종목명/PER/업종PER/상승하락/2019시초가/현재가/업종코드/업종설명")
+        print("종목명/PER/업종PER/상승률/상승하락/2019시초가/현재가/업종코드/업종설명")
 
         for stock_item in stock_item_list:
             stock_code = stock_item[0]
             per_pair = index.get_stock_item_per(stock_code)
-            stock_item_per = per_pair[0]
-            business_average_per = per_pair[1]
+            stock_item_per = per_pair[0].replace(",", "")
+            business_average_per = per_pair[1].replace(",", "")
 
             if stock_item_per == '-' or business_average_per == '-':
                 continue
-            if stock_item_per > business_average_per:
+
+            if float(stock_item_per) > float(business_average_per):
                 continue
 
             increase_rate = sise.get_increase_rate_by_code(stock_code, None)
