@@ -1,6 +1,7 @@
 import pandas as pd
 from Sise import Sise
 
+
 class Stock:
 
     # 아래 데이터 소스 http://www.krx.co.kr/main/main.jsp -> 시장정보 -> 상장현황 -> 상장종목 검색 -> csv 다운로드

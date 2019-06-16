@@ -8,10 +8,10 @@ class Index:
     def main(self):
         per_all_business_category_list = self.get_per_all_business_category()
 
-        print('업종코드//업종PER//업종설명')
+        print('업종코드/업종PER/업종설명')
 
         for per_business_category in per_all_business_category_list:
-            print(per_business_category[0] + "//" + per_business_category[1] + "//" + per_business_category[2])
+            print(per_business_category[0] + "/" + per_business_category[1] + "/" + per_business_category[2])
 
     def get_business_category_code(self):
 
