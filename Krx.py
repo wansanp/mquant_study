@@ -20,14 +20,20 @@ class Krx:
         kospi_index_data = self.get_kospi_kosdaq_index('kospi')
         kosdaq_index_data = self.get_kospi_kosdaq_index('kosdaq')
 
-        print("년/월/일|종가|시가|고가|저가|거래대금|공매도거래대금|공매도잔고금액|코스피종가|코스닥종가")
+        print("년/월/일|종가|시가|고가|저가|거래대금|공매도거래대금|공매도잔고금액|기관거래대금순매수|외국인거래대금순매수|코스피종가|코스닥종가")
 
         for day in range(delta.days+1):
             d = start + timedelta(days=day)
             key = str(d).replace("-", "")
+
             if key in day_price_data:
+
+                amounts = self.get_org_alien_amounts(key)
+
                 print(str(d).replace("-", "/") + "|" + day_price_data[key][0] + "|" + day_price_data[key][1] + "|" + day_price_data[key][2] + "|" + day_price_data[key][3] + "|" + day_price_data[key][4]
-                      + "|" + short_stock_selling_data[key][2] + "|" + short_stock_selling_data[key][3] + "|" + kospi_index_data[key] + "|" + kosdaq_index_data[key])
+                      + "|" + short_stock_selling_data[key][2] + "|" + short_stock_selling_data[key][3]
+                      + "|" + amounts['기관합계'] + "|" + amounts['외국인']
+                      + "|" + kospi_index_data[key] + "|" + kosdaq_index_data[key])
 
     def get_day_price(self):
 
@@ -124,6 +130,33 @@ class Krx:
 
         return result
 
+    def get_org_alien_amounts(self, date):
+
+        # krx menu 80019 투자자별거래실적 (개별종목)
+
+        otp = requests.get('http://marketdata.krx.co.kr/contents/COM/GenerateOTP.jspx?bld=MKD/13/1302/13020303/mkd13020303&name=form')
+
+        parameters = {
+            'isu_cd': self.isin_code,
+            'period_selector':'day',
+            'fromdate': date,
+            'todate': date,
+            'pagePath': '/contents/MKD/13/1302/13020303/MKD13020303.jsp',
+            'code': otp.content
+        }
+
+        res = requests.post('http://marketdata.krx.co.kr/contents/MKD/99/MKD99000001.jspx', parameters)
+
+        data = ast.literal_eval(res.text)['block1']
+
+        result = {}
+
+        for item in data:
+            # netaskval : 거래대금(원) 순매수
+            if item['invst_nm'] == '기관합계' or item['invst_nm'] == '외국인':
+                result[item['invst_nm']] = item['netaskval']
+
+        return result
 
 if __name__ == "__main__":
     Krx().main()
