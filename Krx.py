@@ -31,6 +31,8 @@ class Krx:
 
     def get_day_price(self):
 
+        #krx menu 30040 일자별 시세
+
         otp = requests.get('http://marketdata.krx.co.kr/contents/COM/GenerateOTP.jspx?bld=MKD/04/0402/04020100/mkd04020100t3_02&name=chart')
 
         parameters = {
@@ -87,6 +89,8 @@ class Krx:
 
     def get_kospi_kosdaq_index(self, index_type):
 
+        # krx menu 80001 개별지수 추이
+
         type = None
         ind_type = None
 
@@ -97,7 +101,6 @@ class Krx:
             type = "4"
             ind_type = "2001"
 
-        #krx menu 80001 개별지수 추이
         otp = requests.get('http://marketdata.krx.co.kr/contents/COM/GenerateOTP.jspx?bld=MKD/13/1301/13010102/mkd13010102&name=form')
 
         parameters = {
