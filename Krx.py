@@ -17,15 +17,17 @@ class Krx:
 
         day_price_data = self.get_day_price()
         short_stock_selling_data = self.get_short_stock_selling()
+        kospi_index_data = self.get_kospi_kosdaq_index('kospi')
+        kosdaq_index_data = self.get_kospi_kosdaq_index('kosdaq')
 
-        print("년/월/일|종가|시가|고가|저가|거래대금|공매도거래대금|공매도잔고금액")
+        print("년/월/일|종가|시가|고가|저가|거래대금|공매도거래대금|공매도잔고금액|코스피종가|코스닥종가")
 
         for day in range(delta.days+1):
             d = start + timedelta(days=day)
             key = str(d).replace("-", "")
             if key in day_price_data:
                 print(str(d).replace("-", "/") + "|" + day_price_data[key][0] + "|" + day_price_data[key][1] + "|" + day_price_data[key][2] + "|" + day_price_data[key][3] + "|" + day_price_data[key][4]
-                      + "|" + short_stock_selling_data[key][2] + "|" + short_stock_selling_data[key][3])
+                      + "|" + short_stock_selling_data[key][2] + "|" + short_stock_selling_data[key][3] + "|" + kospi_index_data[key] + "|" + kosdaq_index_data[key])
 
     def get_day_price(self):
 
@@ -80,6 +82,42 @@ class Krx:
             # cvsrtsell_trdval : 공매도 거래대금
             # str_const_val2 : 공매도 잔고금액
             result[item['trd_dd'].replace("/", "")] = (item['cvsrtsell_trdvol'], item['str_const_val1'], item['cvsrtsell_trdval'], item['str_const_val2'])
+
+        return result
+
+    def get_kospi_kosdaq_index(self, index_type):
+
+        type = None
+        ind_type = None
+
+        if index_type == "kospi":
+            type = "3"
+            ind_type = "1001"
+        elif index_type == "kosdaq":
+            type = "4"
+            ind_type = "2001"
+
+        #krx menu 80001 개별지수 추이
+        otp = requests.get('http://marketdata.krx.co.kr/contents/COM/GenerateOTP.jspx?bld=MKD/13/1301/13010102/mkd13010102&name=form')
+
+        parameters = {
+            'type': type,
+            'ind_type': ind_type,
+            'period_strt_dd': self.start_date.replace("/", ""),
+            'period_end_dd': self.end_date.replace("/", ""),
+            'pagePath': '/contents/MKD/13/1301/13010102/MKD13010102.jsp',
+            'code': otp.content
+        }
+
+        res = requests.post('http://marketdata.krx.co.kr/contents/MKD/99/MKD99000001.jspx', parameters)
+
+        data = ast.literal_eval(res.text)['block1']
+
+        result = {}
+
+        for item in data:
+            #indx : 종가
+            result[item['work_dt'].replace("/", "")] = item['indx']
 
         return result
 
