@@ -89,7 +89,7 @@ class Sise:
 
     def find_code_by_name(self, name):
 
-        stock_item_dict = self.get_all_stock_item();
+        stock_item_dict = self.get_all_stock_item()
 
         code = stock_item_dict[name]
 
