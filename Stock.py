@@ -49,11 +49,22 @@ class Stock:
         file = open(self.stock_item_list_file, 'rt', encoding='utf8')
 
         stock_item_list = []
+        total_cnt = None
+        pre_line = ""
+        file.readline()
 
         for line in file.readlines():
+            line = pre_line + line
             token = line.split(',')
+            if total_cnt == None:
+                total_cnt = token[-1]
+            if token[-1] != total_cnt:
+                line = pre_line + line
+                pre_line = line
+                continue
             item = (token[1], token[2], token[3])
             stock_item_list.append(item)
+            pre_line = ""
 
         stock_item_list = stock_item_list[1:]
 
