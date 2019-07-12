@@ -66,8 +66,6 @@ class Stock:
             stock_item_list.append(item)
             pre_line = ""
 
-        stock_item_list = stock_item_list[1:]
-
         return stock_item_list
 
     def get_dividend_rate_per_code(self, code):
