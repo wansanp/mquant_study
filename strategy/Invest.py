@@ -1,6 +1,6 @@
-from Stock import Stock
-from Index import Index
-from Sise import Sise
+from raw_data_process.Stock import Stock
+from strategy.Index import Index
+from raw_data_process.Sise import Sise
 
 class Invest:
 

@@ -1,7 +1,4 @@
-import requests
-from lxml import html
-from Stock import Stock
-
+from raw_data_process.Stock import Stock
 
 class Index:
 
@@ -63,22 +60,6 @@ class Index:
                     break
 
         return per_all_business_category_code_list
-
-    def get_stock_item_per(self, code):
-
-        url = 'https://comp.fnguide.com/SVO2/ASP/SVD_main.asp?gicode=A' + code
-
-        page = requests.get(url)
-        tree = html.fromstring(page.content)
-
-        elements = tree.xpath('//div[@class="corp_group2"]//dl//dd')
-
-        stock_item_per = elements[1].text
-        business_category_per = elements[5].text
-
-        per_pair = (stock_item_per, business_category_per)
-
-        return per_pair
 
 
 if __name__ == '__main__':

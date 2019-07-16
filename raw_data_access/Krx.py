@@ -1,50 +1,22 @@
 import ast
 import requests
-from datetime import date, timedelta
+
 
 class Krx:
 
-    isin_code = 'KR7005930003'
-    start_date = '2019/04/20'
-    end_date = '2019/06/20'
+    stock_item_list_file = '../data/market_stock_item_data.csv'
 
-    def main(self):
+    def get_day_price(self, isin_code, start_date, end_date):
 
-        start = date(int(self.start_date.split("/")[0]), int(self.start_date.split("/")[1]), int(self.start_date.split("/")[2]))
-        end = date(int(self.end_date.split("/")[0]), int(self.end_date.split("/")[1]), int(self.end_date.split("/")[2]))
-
-        delta = end - start
-
-        day_price_data = self.get_day_price()
-        short_stock_selling_data = self.get_short_stock_selling()
-        kospi_index_data = self.get_kospi_kosdaq_index('kospi')
-        kosdaq_index_data = self.get_kospi_kosdaq_index('kosdaq')
-
-        print("년/월/일|종가|시가|고가|저가|거래대금|공매도거래대금|공매도잔고금액|기관거래대금순매수|외국인거래대금순매수|코스피종가|코스닥종가")
-
-        for day in range(delta.days+1):
-            d = start + timedelta(days=day)
-            key = str(d).replace("-", "")
-
-            if key in day_price_data:
-
-                amounts = self.get_org_alien_amounts(key)
-
-                print(str(d).replace("-", "/") + "|" + day_price_data[key][0] + "|" + day_price_data[key][1] + "|" + day_price_data[key][2] + "|" + day_price_data[key][3] + "|" + day_price_data[key][4]
-                      + "|" + short_stock_selling_data[key][2] + "|" + short_stock_selling_data[key][3]
-                      + "|" + amounts['기관합계'] + "|" + amounts['외국인']
-                      + "|" + kospi_index_data[key] + "|" + kosdaq_index_data[key])
-
-    def get_day_price(self):
-
-        #krx menu 30040 일자별 시세
+        # http://marketdata.krx.co.kr/mdi#document=040204
+        # krx menu 30040 일자별 시세
 
         otp = requests.get('http://marketdata.krx.co.kr/contents/COM/GenerateOTP.jspx?bld=MKD/04/0402/04020100/mkd04020100t3_02&name=chart')
 
         parameters = {
-            'isu_cd': self.isin_code,
-            'fromdate': self.start_date.replace("/", ""),
-            'todate': self.end_date.replace("/", ""),
+            'isu_cd': isin_code,
+            'fromdate': start_date.replace("/", ""),
+            'todate': end_date.replace("/", ""),
             'pagePath': '/contents/MKD/04/0402/04020100/MKD04020100T3T2.jsp',
             'code': otp.content
         }
@@ -56,6 +28,7 @@ class Krx:
         result = {}
 
         for item in data:
+            # trd_dd : 날짜
             # tdd_clsprc : 종가
             # acc_trdval : 거래대금
             # tdd_opnprc : 시가
@@ -65,15 +38,15 @@ class Krx:
 
         return result
 
-    def get_short_stock_selling(self):
+    def get_short_stock_selling(self, isin_code, start_date, end_date):
 
         # reverse engineered from the source at here https://finance.naver.com/item/short_trade.nhn?code=005930
         otp = requests.get('https://short.krx.co.kr/contents/COM/GenerateOTP.jspx?bld=SRT/02/02010100/srt02010100X&name=form')
 
         parameters = {
-            'isu_cd': self.isin_code,
-            'strt_dd': self.start_date.replace("/", ""),
-            'end_dd': self.end_date.replace("/", ""),
+            'isu_cd': isin_code,
+            'strt_dd': start_date.replace("/", ""),
+            'end_dd': end_date.replace("/", ""),
             'pagePath': '/contents/SRT/02/02010100/SRT02010100X.jsp',
             'code': otp.content
         }
@@ -93,7 +66,7 @@ class Krx:
 
         return result
 
-    def get_kospi_kosdaq_index(self, index_type):
+    def get_kospi_kosdaq_index(self, index_type, start_date, end_date):
 
         # krx menu 80001 개별지수 추이
 
@@ -112,8 +85,8 @@ class Krx:
         parameters = {
             'type': type,
             'ind_type': ind_type,
-            'period_strt_dd': self.start_date.replace("/", ""),
-            'period_end_dd': self.end_date.replace("/", ""),
+            'period_strt_dd': start_date.replace("/", ""),
+            'period_end_dd': end_date.replace("/", ""),
             'pagePath': '/contents/MKD/13/1301/13010102/MKD13010102.jsp',
             'code': otp.content
         }
@@ -130,14 +103,14 @@ class Krx:
 
         return result
 
-    def get_org_alien_amounts(self, date):
+    def get_org_alien_amounts(self, isin_code, date):
 
         # krx menu 80019 투자자별거래실적 (개별종목)
 
         otp = requests.get('http://marketdata.krx.co.kr/contents/COM/GenerateOTP.jspx?bld=MKD/13/1302/13020303/mkd13020303&name=form')
 
         parameters = {
-            'isu_cd': self.isin_code,
+            'isu_cd': isin_code,
             'period_selector':'day',
             'fromdate': date,
             'todate': date,
@@ -158,6 +131,27 @@ class Krx:
 
         return result
 
-if __name__ == "__main__":
-    Krx().main()
+    def get_all_stock_item_list(self):
+
+        file = open(self.stock_item_list_file, 'rt', encoding='utf8')
+
+        stock_item_list = []
+        total_cnt = None
+        pre_line = ""
+        file.readline()
+
+        for line in file.readlines():
+            line = pre_line + line
+            token = line.split(',')
+            if total_cnt is None:
+                total_cnt = token[-1]
+            if token[-1] != total_cnt:
+                line = pre_line + line
+                pre_line = line
+                continue
+            item = (token[1], token[2], token[3]) #종목코드, 종목명, 업종코드
+            stock_item_list.append(item)
+            pre_line = ""
+
+        return stock_item_list
 

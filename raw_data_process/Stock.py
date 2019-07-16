@@ -1,5 +1,5 @@
 import pandas as pd
-from Sise import Sise
+from raw_data_process.Sise import Sise
 
 
 class Stock:
@@ -43,30 +43,6 @@ class Stock:
                 print(stock[1] + ',0,0')
             else:
                 print(stock[1] + ',' + data[0] + ',' + data[1])
-
-    def get_all_stock_item_list(self):
-
-        file = open(self.stock_item_list_file, 'rt', encoding='utf8')
-
-        stock_item_list = []
-        total_cnt = None
-        pre_line = ""
-        file.readline()
-
-        for line in file.readlines():
-            line = pre_line + line
-            token = line.split(',')
-            if total_cnt == None:
-                total_cnt = token[-1]
-            if token[-1] != total_cnt:
-                line = pre_line + line
-                pre_line = line
-                continue
-            item = (token[1], token[2], token[3])
-            stock_item_list.append(item)
-            pre_line = ""
-
-        return stock_item_list
 
     def get_dividend_rate_per_code(self, code):
 
