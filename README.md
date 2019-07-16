@@ -10,3 +10,5 @@
    - raw_data_process : 위의 데이터를 바탕으로 계산, 논리적인 비교 등 포함
    - request : 요청에 의해 custom 으로 구현한 것들
    - result : 실험에 의해 나온 결과들
+   - seminar : 세미나 자료
+   - strategy : 퀀트 전략
