@@ -2,7 +2,8 @@ from raw_data_access.Krx import Krx
 from raw_data_access.Fnguide import Fnguide
 from raw_data_access.Naver import Naver
 from raw_data_process.Sise import Sise
-
+import math
+import numpy as np
 
 def chapter8_035():
 
@@ -16,9 +17,15 @@ def chapter8_035():
     print("종목명,시가총액,매출액,PSR,상승률,상승하락,년초가,현재가,결산월")
 
     for stock_item in stock_item_list:
-        code = stock_item[0]
+
+        code = '093380'
+        #code = stock_item[0]
         df = fnguide.get_fnguide_financial_dataframe(code)
         if df is None:
+            continue
+
+        if 'IFRS(연결)' not in df.columns or 'Annual' not in df.columns:
+            print(stock_item[1] + ",n/a")
             continue
 
         df = df[['IFRS(연결)', 'Annual']]
@@ -40,21 +47,32 @@ def chapter8_035():
             year_settlement = '2018/07'
         elif '2018/09' in df.columns:
             year_settlement = '2018/09'
-        else:
+        elif '2018/08' in df.columns:
+            year_settlement = '2018/08'
+        elif '2018/12' in df.columns:
             year_settlement = '2018/12'
+
+        if year_settlement is None:
+            print(stock_item[1] + ",n/a")
+            continue
 
         df = df[year_settlement]
         df1 = df.iloc[[0]]
         df2 = df.loc[['발행주식수']]
 
-        sales = df1.values[0]
-        issued_stock_count = df2.values[0]
+        if type(df1.values[0]) == np.float64 and math.isnan(df1.values[0]):
+            continue
+        if type(df1.values[0]) == np.float64 and math.isnan(df2.values[0]):
+            continue
+
+        sales = int(df1.values[0])
+        issued_stock_count = int(df2.values[0])
         year_first_stock_price = naver.get_2019_first_stock_price(code, None)
 
         if year_first_stock_price is None:
             continue
 
-        market_capitalization = int(issued_stock_count) * int(year_first_stock_price.split("|")[4])
+        market_capitalization = issued_stock_count * int(year_first_stock_price.split("|")[4])
 
         price_gap = sise.get_increase_rate_by_code(code, None)
 
