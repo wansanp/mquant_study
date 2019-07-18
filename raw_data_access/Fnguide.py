@@ -36,3 +36,18 @@ class Fnguide:
                 break
 
         return df
+
+    def get_fnguide_dataframe(self, code, column_name):
+
+        url = self.url_prefix + code
+
+        tables = pandas.read_html(url)
+
+        df = None
+
+        for table in tables:
+            if column_name in table.columns:
+                df = table
+                break
+
+        return df

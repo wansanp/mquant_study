@@ -154,4 +154,3 @@ class Krx:
             pre_line = ""
 
         return stock_item_list
-

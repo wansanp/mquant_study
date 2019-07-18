@@ -1,25 +1,19 @@
+from raw_data_access.Naver import Naver
+
 
 class Sise:
 
-    default_querying_size = 500
-
-    def get_increase_rate_by_name(self, name, size):
-
-        if size is None:
-            size = self.default_querying_size
-
-        code = self.find_code_by_name(name)
-        data = self.get_increase_rate_by_code(code, size)
-
-        return data
+    default_querying_size = '500'
 
     def get_increase_rate_by_code(self, code, size):
 
+        naver = Naver()
+
         if size is None:
             size = self.default_querying_size
 
-        first = self.get_2018_first_price(code, size)
-        latest = self.get_latest_price(code)
+        first = naver.get_2019_first_stock_price(code, size)
+        latest = naver.get_latest_stock_price(code)
 
         if first is None:
             return None
