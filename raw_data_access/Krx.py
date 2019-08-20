@@ -215,3 +215,51 @@ class Krx:
         elif mode == 2:
             df.to_excel('../data/krx_kind_corporation_list.xls', encoding='euc-kr')
         return df
+
+    def get_stock_master_corporation_search(self, mode=2):
+        # KRX 30029 상장회사검색
+        # 번호, 종목코드, 기업명, 업종코드, 업종, 상장주식수(주), 자본금(원), 액면가(원), 통화구분. 대표전화, 주소
+        if mode == 1:
+            filetype = 'csv'
+        elif mode == 2:
+            filetype = 'xls'
+
+        gen_otp_url = 'http://marketdata.krx.co.kr/contents/COM/GenerateOTP.jspx'
+        gen_otp_data = {
+            'name': 'fileDown',
+            'filetype': filetype,
+            'url': 'MKD/04/0406/04060100/mkd04060100_01',
+            'market_gubun': 'ALL',
+            'isu_cdnm': '전체',
+            'isu_cd': '',
+            'isu_nm': '',
+            'isu_srt_cd': '',
+            'sort_type': 'A',
+            'std_ind_cd': '',
+            'par_pr': '',
+            'cpta_scl': '',
+            'sttl_trm': '',
+            'lst_stk_vl': '1',
+            'in_lst_stk_vl': '',
+            'in_lst_stk_vl2': '',
+            'cpt': '1',
+            'in_cpt': '',
+            'in_cpt2': '',
+            'mktpartc_no': '',
+            'pagePath': '/contents/MKD/04/0406/04060100/MKD04060100.jsp',
+        }
+        r = requests.post(gen_otp_url, gen_otp_data)
+        code = r.content
+        down_url = 'http://file.krx.co.kr/download.jspx'
+        down_data = {'code': code}
+        down_header = {'Referer': 'http://marketdata.krx.co.kr/mdi'}
+        r = requests.post(down_url, headers=down_header, data=down_data)
+
+        if mode == 1:
+            df = pd.read_csv(BytesIO(r.content), header=0, index_col=0, thousands=',', sep='delimiter', engine='python',
+                             encoding='utf-8')
+            df.to_csv('krx_corporation_list.csv', encoding='euc-kr')
+        elif mode == 2:
+            df = pd.read_excel(BytesIO(r.content), header=0, index_col=0, thousands=',', converters={'종목코드': str})
+            df.to_excel('krx_corporation_list.xls', encoding='euc-kr')
+        return df
