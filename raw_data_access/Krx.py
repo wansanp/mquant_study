@@ -258,8 +258,8 @@ class Krx:
         if mode == 1:
             df = pd.read_csv(BytesIO(r.content), header=0, index_col=0, thousands=',', sep='delimiter', engine='python',
                              encoding='utf-8')
-            df.to_csv('krx_corporation_list.csv', encoding='euc-kr')
+            df.to_csv('../data/krx_corporation_list.csv', encoding='euc-kr')
         elif mode == 2:
             df = pd.read_excel(BytesIO(r.content), header=0, index_col=0, thousands=',', converters={'종목코드': str})
-            df.to_excel('krx_corporation_list.xls', encoding='euc-kr')
+            df.to_excel('../data/krx_corporation_list.xls', encoding='euc-kr')
         return df
