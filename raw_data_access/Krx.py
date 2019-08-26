@@ -1,6 +1,8 @@
 import ast
 import requests
-
+import pandas as pd
+from datetime import datetime
+from io import BytesIO
 
 class Krx:
 
@@ -154,3 +156,110 @@ class Krx:
             pre_line = ""
 
         return stock_item_list
+
+    def get_stock_master_total_rank(self, mode=1, date_str=None):
+        # KRX MarketData 30015 시가총액 상/하위
+        # 종목코드, 종목명, 현재가, 대비, 등락률, 거래량, 거래대금, 시가, 고가, 저가,
+        # 시가총액, 시가총액비중(%), 상장주식수, 외국인, 보유주식수, 외국인, 지분율(%)
+        if date_str == None:
+            date_str = datetime.today().strftime('%Y%m%d')
+        if mode == 1:
+            filetype = 'csv'
+        elif mode == 2:
+            filetype = 'xls'
+
+        gen_otp_url = 'http://marketdata.krx.co.kr/contents/COM/GenerateOTP.jspx'
+        gen_otp_data = {
+            'name': 'fileDown',
+            'filetype': filetype,
+            'url': 'MKD/04/0404/04040200/mkd04040200_01',
+            'market_gubun': 'ALL',
+            'indx_ind_cd': '',
+            'sect_tp_cd': 'ALL',
+            'schdate': date_str,
+            'pagePath': '/contents/MKD/04/0404/04040200/MKD04040200.jsp',
+        }
+        r = requests.post(gen_otp_url, gen_otp_data)
+        code = r.content
+        down_url = 'http://file.krx.co.kr/download.jspx'
+        down_data = {'code': code}
+        down_header = {'Referer': 'http://marketdata.krx.co.kr/mdi'}
+        r = requests.post(down_url, headers=down_header, data=down_data)
+
+        if mode == 1:
+            df = pd.read_csv(BytesIO(r.content), header=0, index_col=0, thousands=',', converters={'종목코드': str})
+            df.to_csv('../data/krx_total_rank.csv', encoding='euc-kr')
+        elif mode == 2:
+            df = pd.read_excel(BytesIO(r.content), header=0, index_col=0, thousands=',', converters={'종목코드': str})
+            df.to_excel('../data/krx_total_rank.xls', encoding='euc-kr')
+        return df
+
+    def get_stock_master_corporation_list(self, mode=1):
+        # KRX KIND 상장법인목록
+        # 회사명, 종목코드, 업종, 주요제품, 상장일, 결산월, 대표자명, 홈페이지, 지역
+        data = {
+            'method': 'download',
+            'pageIndex': '1',
+            'currentPageSize': '5000',
+            'orderMode': '3',
+            'orderStat': 'D',
+            'searchType': '13',
+            'fiscalYearEnd': 'all',
+            'location': 'all',
+        }
+        r = requests.post('http://kind.krx.co.kr/corpgeneral/corpList.do', data=data)
+        df = pd.read_html(BytesIO(r.content), header=0, index_col=0, converters={'종목코드': str})[0]
+
+        if mode == 1:
+            df.to_csv('../data/krx_kind_corporation_list.csv', encoding='euc-kr')
+        elif mode == 2:
+            df.to_excel('../data/krx_kind_corporation_list.xls', encoding='euc-kr')
+        return df
+
+    def get_stock_master_corporation_search(self, mode=2):
+        # KRX 30029 상장회사검색
+        # 번호, 종목코드, 기업명, 업종코드, 업종, 상장주식수(주), 자본금(원), 액면가(원), 통화구분. 대표전화, 주소
+        if mode == 1:
+            filetype = 'csv'
+        elif mode == 2:
+            filetype = 'xls'
+
+        gen_otp_url = 'http://marketdata.krx.co.kr/contents/COM/GenerateOTP.jspx'
+        gen_otp_data = {
+            'name': 'fileDown',
+            'filetype': filetype,
+            'url': 'MKD/04/0406/04060100/mkd04060100_01',
+            'market_gubun': 'ALL',
+            'isu_cdnm': '전체',
+            'isu_cd': '',
+            'isu_nm': '',
+            'isu_srt_cd': '',
+            'sort_type': 'A',
+            'std_ind_cd': '',
+            'par_pr': '',
+            'cpta_scl': '',
+            'sttl_trm': '',
+            'lst_stk_vl': '1',
+            'in_lst_stk_vl': '',
+            'in_lst_stk_vl2': '',
+            'cpt': '1',
+            'in_cpt': '',
+            'in_cpt2': '',
+            'mktpartc_no': '',
+            'pagePath': '/contents/MKD/04/0406/04060100/MKD04060100.jsp',
+        }
+        r = requests.post(gen_otp_url, gen_otp_data)
+        code = r.content
+        down_url = 'http://file.krx.co.kr/download.jspx'
+        down_data = {'code': code}
+        down_header = {'Referer': 'http://marketdata.krx.co.kr/mdi'}
+        r = requests.post(down_url, headers=down_header, data=down_data)
+
+        if mode == 1:
+            df = pd.read_csv(BytesIO(r.content), header=0, index_col=0, thousands=',', sep='delimiter', engine='python',
+                             encoding='utf-8')
+            df.to_csv('../data/krx_corporation_list.csv', encoding='euc-kr')
+        elif mode == 2:
+            df = pd.read_excel(BytesIO(r.content), header=0, index_col=0, thousands=',', converters={'종목코드': str})
+            df.to_excel('../data/krx_corporation_list.xls', encoding='euc-kr')
+        return df
