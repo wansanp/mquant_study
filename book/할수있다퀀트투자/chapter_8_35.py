@@ -18,8 +18,7 @@ def chapter8_035():
 
     for stock_item in stock_item_list:
 
-        code = '093380'
-        #code = stock_item[0]
+        code = stock_item[0]
         df = fnguide.get_fnguide_financial_dataframe(code)
         if df is None:
             continue

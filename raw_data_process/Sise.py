@@ -35,16 +35,9 @@ class Sise:
         first = int(first)
         current = int(current)
 
-        result_price = current / first
-        result_price = round(result_price, 3)
-        result = "보합"
+        ratio = ((current - first) / first) * 100
+        ratio = round(ratio, 2)
 
-        if current > first:
-            result = "상승"
-
-        if first > current:
-            result = "하락"
-
-        data = (result_price, result, first, current)
+        data = (ratio, first, current)
 
         return data

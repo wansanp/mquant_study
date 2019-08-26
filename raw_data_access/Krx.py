@@ -4,7 +4,7 @@ import requests
 
 class Krx:
 
-    stock_item_list_file = '../data/market_stock_item_data.csv'
+    stock_item_list_file = '../../data/market_stock_item_data.csv'
 
     def get_day_price(self, isin_code, start_date, end_date):
 
