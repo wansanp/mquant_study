@@ -23,16 +23,16 @@ class Fnguide:
 
         return per_pair
 
-    def get_fnguide_financial_dataframe(self, code):
+    def get_fnguide_financial_dataframe(self, code, column_name):
 
-        url = self.url_prefix + code
+        url = self.url_finance + code
 
         tables = pandas.read_html(url)
 
         df = None
 
         for table in tables:
-            if 'IFRS(연결)' in table.columns:
+            if column_name in table.columns:
                 df = table
                 break
 
