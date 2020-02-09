@@ -3,10 +3,12 @@ import requests
 import pandas as pd
 from datetime import datetime
 from io import BytesIO
+import os
 
 class Krx:
 
-    stock_item_list_file = '../../data/market_stock_item_data.csv'
+    kospi_stock_item_list_file = '../data/market_stock_item_data_kospi.csv'
+    kosdaq_stock_item_list_file = '../data/market_stock_item_data_kosdaq.csv'
 
     def get_day_price(self, isin_code, start_date, end_date):
 
@@ -135,25 +137,20 @@ class Krx:
 
     def get_all_stock_item_list(self):
 
-        file = open(self.stock_item_list_file, 'rt', encoding='utf8')
+        kospi_file = open(self.kospi_stock_item_list_file, 'rt', encoding='utf8')
+        kosdaq_file = open(self.kosdaq_stock_item_list_file, 'rt', encoding='utf8')
 
         stock_item_list = []
-        total_cnt = None
-        pre_line = ""
-        file.readline()
 
-        for line in file.readlines():
-            line = pre_line + line
+        for line in kospi_file.readlines():
             token = line.split(',')
-            if total_cnt is None:
-                total_cnt = token[-1]
-            if token[-1] != total_cnt:
-                line = pre_line + line
-                pre_line = line
-                continue
             item = (token[1], token[2], token[3]) #종목코드, 종목명, 업종코드
             stock_item_list.append(item)
-            pre_line = ""
+
+        for line in kosdaq_file.readlines():
+            token = line.split(',')
+            item = (token[1], token[2], token[3]) #종목코드, 종목명, 업종코드
+            stock_item_list.append(item)
 
         return stock_item_list
 
