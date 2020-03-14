@@ -44,8 +44,18 @@ class Krx:
 
     def get_short_stock_selling(self, isin_code, start_date, end_date):
 
+        headers = {
+            'Host': 'short.krx.co.kr',
+            'User-Agent': 'Mozilla / 5.0(Windows NT 10.0; Win64; x64; rv: 73.0) Gecko / 20100101 Firefox / 73.0',
+            'Accept': '*/*',
+            'Accept-Language': 'ko-KR,ko;q=0.8,en-US;q=0.5,en;q=0.3',
+            'Accept-Encoding': 'gzip, deflate, br',
+            'X-Requested-With': 'XMLHttpRequest',
+            'Connection': 'keep-alive'
+        }
+
         # reverse engineered from the source at here https://finance.naver.com/item/short_trade.nhn?code=005930
-        otp = requests.get('https://short.krx.co.kr/contents/COM/GenerateOTP.jspx?bld=SRT/02/02010100/srt02010100X&name=form')
+        otp = requests.get('https://short.krx.co.kr/contents/COM/GenerateOTP.jspx?bld=SRT%2F02%2F02010100%2Fsrt02010100X&name=form&_=1584190719011', headers=headers)
 
         parameters = {
             'isu_cd': isin_code,

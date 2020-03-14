@@ -42,7 +42,6 @@ class Naver:
 
         # 날짜,시가,고가,저가,종가,거래량
         for item in items:
-
             dict_data = item.get('data').split("|")
             data[dict_data[0]] = dict_data[1] + "|" + dict_data[2] + "|" + dict_data[3] + "|" + dict_data[4] + "|" + dict_data[5]
 
@@ -59,7 +58,6 @@ class Naver:
 
         # 날짜,시가,고가,저가,종가,거래량
         for item in items:
-
             dict_data = item.get('data').split("|")
             data[dict_data[0]] = dict_data[1] + "|" + dict_data[2] + "|" + dict_data[3] + "|" + dict_data[4] + "|" + dict_data[5]
 
