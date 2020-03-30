@@ -7,8 +7,6 @@ krx = Krx()
 
 stock_item_list = krx.get_all_stock_item_list()
 
-stock_item_list = stock_item_list[476:]
-
 print("종목명,2020-01-02 외인보유 량, 2020-01-02 외인보유 비율, 2020-03-19 외인보유 량, 2020-03-19 외인보유 비율")
 
 for stock_item in stock_item_list:

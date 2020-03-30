@@ -6,6 +6,7 @@ class Fnguide:
 
     url_prefix = 'https://comp.fnguide.com/SVO2/ASP/SVD_main.asp?gicode=A'
     url_finance = 'https://comp.fnguide.com/SVO2/ASP/SVD_Finance.asp?ReportGB=D&gicode=A'
+    url_finance_ratio = 'https://comp.fnguide.com/SVO2/ASP/SVD_FinanceRatio.asp?ReportGB=D&gicode=A'
 
     def get_stock_item_per(self, code):
 
@@ -35,6 +36,25 @@ class Fnguide:
             if column_name in table.columns:
                 df = table
                 break
+
+        return df
+
+    def get_fnguide_financial_ratio_dataframe(self, code, column_name):
+
+        url = self.url_finance_ratio + code
+
+        df = None
+
+        try:
+            tables = pandas.read_html(url)
+
+            for table in tables:
+                if column_name in table.columns:
+                    df = table
+                    break
+
+        except ValueError:
+            None
 
         return df
 
